@@ -440,7 +440,17 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
                     else:
                         cls = obj.__globals__[cls_path]
                 except Exception:
-                    cls_is_owner = False
+                    # Fallback: try importlib approach for simple class names too
+                    # This handles decorated methods where obj.__globals__ doesn't contain the class
+                    try:
+                        import importlib
+                        mod = importlib.import_module(obj.__module__)
+                        cls = getattr(mod, cls_path)
+                    except Exception:
+                        cls_is_owner = False
+                    else:
+                        cls_is_owner = (cls and hasattr(cls, name) and  # type: ignore
+                                        name in cls.__dict__)
                 else:
                     cls_is_owner = (cls and hasattr(cls, name) and  # type: ignore
                                     name in cls.__dict__)

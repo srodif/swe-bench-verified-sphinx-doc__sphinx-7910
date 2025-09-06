@@ -19,7 +19,12 @@ from docutils.parsers.rst.languages import en as english
 from docutils.statemachine import StringList
 from docutils.utils import Reporter
 from jinja2 import Environment
-from jinja2 import environmentfilter
+try:
+    from jinja2 import environmentfilter
+except ImportError:
+    # In newer Jinja2 versions, environmentfilter is deprecated
+    def environmentfilter(f):
+        return f
 
 from sphinx.locale import __
 from sphinx.util import docutils

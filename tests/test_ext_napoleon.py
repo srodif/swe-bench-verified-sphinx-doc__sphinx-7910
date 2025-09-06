@@ -70,6 +70,22 @@ class SampleError(Exception):
 SampleNamedTuple = namedtuple('SampleNamedTuple', 'user_id block_type def_id')
 
 
+def sample_decorator(func):
+    """A decorator that simulates the issue with decorated __init__ methods."""
+    import functools
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+
+class SampleDecoratedClass:
+    @sample_decorator
+    def __init__(self):
+        """SampleDecoratedClass.__init__.DOCSTRING"""
+        pass
+
+
 class ProcessDocstringTest(TestCase):
     def test_modify_in_place(self):
         lines = ['Summary line.',
@@ -205,3 +221,9 @@ class SkipMemberTest(TestCase):
     def test_module_special_undoc(self):
         self.assertSkip('module', '__special_undoc__', __special_undoc__, True,
                         'napoleon_include_special_with_doc')
+
+    def test_decorated_init_doc(self):
+        """Test that decorated __init__ methods with docstrings are included when configured."""
+        self.assertSkip('class', '__init__',
+                        SampleDecoratedClass.__init__, False,
+                        'napoleon_include_init_with_doc')
